@@ -1,12 +1,24 @@
-APP DE INSTALACIONES — OLIVER Y BERNARDO
+APP DE INSTALACIONES — OLIVER Y BERNARDO · VERSIÓN 2
 
-USO RÁPIDO EN ORDENADOR
-1. Descomprime el ZIP.
-2. Abre index.html con Chrome, Edge, Safari o Firefox.
+ACTUALIZAR LOS DATOS
+1. Abre la app.
+2. Pulsa «Actualizar desde Excel».
+3. Selecciona el archivo EstadoPedidosAct2026.xlsx actualizado.
+4. La app mostrará cuántas instalaciones son nuevas, modificadas y sin cambios.
+5. Confirma la actualización.
 
-PUBLICAR COMO APP EN IPHONE
-1. Sube todos los archivos de la carpeta a GitHub Pages, Netlify o cualquier alojamiento web.
+La app:
+- Conserva únicamente instalaciones cuyo COMERCIAL sea OLIVER o BERNARDO.
+- Usa NºInst. como identificador para evitar duplicados.
+- Guarda los datos actualizados en el dispositivo.
+- Conserva una copia anterior para poder restaurarla.
+- No modifica el Excel original.
+
+IMPORTANTE
+Para importar archivos Excel, la primera apertura publicada necesita conexión para cargar el lector de Excel.
+Después, la PWA intenta conservarlo en caché para uso posterior.
+
+INSTALAR EN IPHONE
+1. Publica todos los archivos en GitHub Pages o similar.
 2. Abre la dirección en Safari.
 3. Pulsa Compartir > Añadir a pantalla de inicio.
-
-La búsqueda funciona por cualquier dato de la ficha. Los datos están incrustados en data.js.

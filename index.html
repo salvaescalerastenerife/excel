@@ -37,6 +37,10 @@ h1{margin:18px 0 8px;font-size:clamp(28px,5vw,48px);line-height:1.02;letter-spac
 .chip{white-space:nowrap;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:9px 13px;border-radius:999px}
 .chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
 .secondary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.updatebar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.updatebtn{border:0;background:var(--gold);color:#173f3a;font-weight:850;padding:11px 15px;border-radius:14px;box-shadow:0 8px 22px rgba(143,92,20,.16)}
+.restorebtn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:10px 13px;border-radius:14px}
+.updateinfo{color:var(--muted);font-size:12px;flex:1;min-width:180px}
 select{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:11px;color:var(--ink)}
 .meta{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px;color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px}
@@ -93,6 +97,12 @@ dialog::backdrop{background:rgba(6,26,23,.62);backdrop-filter:blur(5px)}
     <select id="taller"><option value="">Todos los talleres</option></select>
     <select id="machine"><option value="">Todos los tipos de máquina</option></select>
   </div>
+  <div class="updatebar">
+    <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+    <button class="updatebtn" id="importExcel">↻ Actualizar desde Excel</button>
+    <button class="restorebtn" id="restoreBackup" hidden>Restaurar anterior</button>
+    <span class="updateinfo" id="updateInfo">Datos iniciales incluidos en la app</span>
+  </div>
 </section>
 
 <div class="meta"><span id="resultCount"></span><span id="activeFilter"></span></div>
@@ -105,9 +115,16 @@ dialog::backdrop{background:rgba(6,26,23,.62);backdrop-filter:blur(5px)}
   <div class="modalbody" id="modalBody"></div>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="data.js"></script>
 <script>
-const data = window.INSTALLATIONS_DATA || [];
+const DEFAULT_DATA = window.INSTALLATIONS_DATA || [];
+let data = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem("installations_current") || "null");
+    return Array.isArray(saved) && saved.length ? saved : DEFAULT_DATA;
+  } catch { return DEFAULT_DATA; }
+})();
 const state={owner:"TODOS",special:"",q:"",taller:"",machine:""};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const norm=s=>(s??"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
@@ -116,8 +133,18 @@ const val=(r,k)=>r[k]??"";
 function hasComments(r){return ["COMENTARIOS (RETRASO MEDIDAS RESPECTO PAGO)","DIVERGENCIAS","Remakes","Remakes 2"].some(k=>norm(val(r,k)));}
 function isPending(r){const m=norm(val(r,"Fecha montaje"));return !m || m==="cancelado";}
 function searchable(r){return norm(Object.entries(r).filter(([k])=>!k.startsWith("_")).map(([,v])=>v).join(" | "))}
-function fillSelect(id,key){const sel=$(id);[...new Set(data.map(r=>String(val(r,key))).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true})).forEach(v=>sel.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`))}
-fillSelect("#taller","TALLER");fillSelect("#machine","Tipo de Máq.");
+function fillSelect(id,key,label){
+ const sel=$(id), current=sel.value;
+ sel.innerHTML=`<option value="">${label}</option>`;
+ [...new Set(data.map(r=>String(val(r,key))).filter(Boolean))]
+   .sort((a,b)=>a.localeCompare(b,"es",{numeric:true}))
+   .forEach(v=>sel.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`));
+ if([...sel.options].some(o=>o.value===current)) sel.value=current;
+}
+function refreshSelects(){
+ fillSelect("#taller","TALLER","Todos los talleres");
+ fillSelect("#machine","Tipo de Máq.","Todos los tipos de máquina");
+}
 function updateStats(){
  $("#totalStat").textContent=data.length;
  $("#oliverStat").textContent=data.filter(r=>norm(val(r,"COMERCIAL"))==="oliver").length;
@@ -191,6 +218,126 @@ $$("[data-special]").forEach(b=>b.onclick=()=>{
 $("#taller").onchange=e=>{state.taller=e.target.value;render()};
 $("#machine").onchange=e=>{state.machine=e.target.value;render()};
 modal.addEventListener("click",e=>{if(e.target===modal)modal.close()});
+
+const STORAGE_CURRENT="installations_current";
+const STORAGE_BACKUP="installations_backup";
+const STORAGE_UPDATED="installations_updated_at";
+
+function excelSerialToDate(v){
+  if(typeof v==="number" && v>=30000 && v<=70000){
+    const d=new Date(Date.UTC(1899,11,30)+v*86400000);
+    return new Intl.DateTimeFormat("es-ES",{day:"2-digit",month:"2-digit",year:"numeric",timeZone:"UTC"}).format(d);
+  }
+  if(v instanceof Date && !isNaN(v)){
+    return new Intl.DateTimeFormat("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"}).format(v);
+  }
+  return v;
+}
+function uniqueHeaders(row){
+  const seen={};
+  return row.map((h,i)=>{
+    let name=(h??"").toString().trim()||`Campo ${i+1}`;
+    seen[name]=(seen[name]||0)+1;
+    return seen[name]>1?`${name} ${seen[name]}`:name;
+  });
+}
+function canonicalRecord(r){
+  const x={...r}; delete x._id;
+  return JSON.stringify(x,Object.keys(x).sort());
+}
+function parseWorkbookRows(rows){
+  if(!rows?.length) throw new Error("El archivo no contiene filas.");
+  const headers=uniqueHeaders(rows[0]);
+  const commercialIndex=headers.findIndex(h=>norm(h)==="comercial");
+  const installationIndex=headers.findIndex(h=>["nºinst.","nºinst","n°inst.","n°inst"].includes(norm(h)));
+  if(commercialIndex<0) throw new Error('No encuentro la columna "COMERCIAL".');
+  if(installationIndex<0) throw new Error('No encuentro la columna "NºInst.".');
+
+  const byId=new Map();
+  rows.slice(1).forEach((row,rowIndex)=>{
+    const owner=norm(row[commercialIndex]);
+    if(owner!=="oliver" && owner!=="bernardo") return;
+    const rec={};
+    headers.forEach((h,i)=>rec[h]=excelSerialToDate(row[i]??""));
+    const id=(row[installationIndex]??"").toString().trim();
+    if(!id) return;
+    rec._id=id;
+    byId.set(id,rec);
+  });
+  const parsed=[...byId.values()];
+  if(!parsed.length) throw new Error("No encontré instalaciones de Oliver o Bernardo.");
+  return parsed;
+}
+function compareDatasets(next){
+  const current=new Map(data.map(r=>[String(r._id),r]));
+  let added=0,updated=0,unchanged=0;
+  next.forEach(r=>{
+    const old=current.get(String(r._id));
+    if(!old) added++;
+    else if(canonicalRecord(old)===canonicalRecord(r)) unchanged++;
+    else updated++;
+  });
+  const removed=[...current.keys()].filter(id=>!next.some(r=>String(r._id)===id)).length;
+  return {added,updated,unchanged,removed};
+}
+async function importExcelFile(file){
+  if(typeof XLSX==="undefined") throw new Error("No se pudo cargar el lector de Excel. Comprueba la conexión e inténtalo de nuevo.");
+  const buffer=await file.arrayBuffer();
+  const workbook=XLSX.read(buffer,{type:"array",cellDates:true});
+  const sheet=workbook.Sheets[workbook.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:"",raw:true});
+  const next=parseWorkbookRows(rows);
+  const c=compareDatasets(next);
+  const message=`Se han encontrado ${next.length} instalaciones de Oliver y Bernardo.\n\n`+
+    `Nuevas: ${c.added}\nActualizadas: ${c.updated}\nSin cambios: ${c.unchanged}\n`+
+    (c.removed?`Ya no aparecen en el Excel: ${c.removed}\n`:"")+
+    `\n¿Actualizar la app con este archivo?`;
+  if(!confirm(message)) return;
+  localStorage.setItem(STORAGE_BACKUP,JSON.stringify(data));
+  localStorage.setItem(STORAGE_CURRENT,JSON.stringify(next));
+  localStorage.setItem(STORAGE_UPDATED,new Date().toISOString());
+  data=next;
+  state.q="";state.taller="";state.machine="";state.owner="TODOS";state.special="";
+  $("#q").value="";
+  $$(".chip").forEach(x=>x.classList.remove("active"));
+  $('[data-owner="TODOS"]').classList.add("active");
+  refreshSelects();updateStats();render();updateImportStatus();
+  alert(`Actualización terminada.\n\n${c.added} nuevas y ${c.updated} modificadas.`);
+}
+function updateImportStatus(){
+  const iso=localStorage.getItem(STORAGE_UPDATED);
+  $("#restoreBackup").hidden=!localStorage.getItem(STORAGE_BACKUP);
+  $("#updateInfo").textContent=iso
+    ? `Última actualización: ${new Intl.DateTimeFormat("es-ES",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso))}`
+    : "Datos iniciales incluidos en la app";
+}
+$("#importExcel").onclick=()=>$("#excelFile").click();
+$("#excelFile").onchange=async e=>{
+  const file=e.target.files?.[0];
+  if(!file) return;
+  try{
+    $("#importExcel").disabled=true;
+    $("#importExcel").textContent="Leyendo Excel…";
+    await importExcelFile(file);
+  }catch(err){
+    alert(`No pude importar el archivo.\n\n${err.message}`);
+  }finally{
+    $("#importExcel").disabled=false;
+    $("#importExcel").textContent="↻ Actualizar desde Excel";
+    e.target.value="";
+  }
+};
+$("#restoreBackup").onclick=()=>{
+  const backup=localStorage.getItem(STORAGE_BACKUP);
+  if(!backup || !confirm("¿Restaurar los datos anteriores a la última importación?")) return;
+  const current=JSON.stringify(data);
+  data=JSON.parse(backup);
+  localStorage.setItem(STORAGE_CURRENT,JSON.stringify(data));
+  localStorage.setItem(STORAGE_BACKUP,current);
+  localStorage.setItem(STORAGE_UPDATED,new Date().toISOString());
+  refreshSelects();updateStats();render();updateImportStatus();
+};
+refreshSelects();updateImportStatus();
 updateStats();render();
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js");
 </script>
