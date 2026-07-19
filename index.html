@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173f3a">
+<title>Instalaciones | Oliver y Bernardo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --ink:#173f3a;--ink2:#245e56;--cream:#f7f4ed;--paper:#fffdfa;--line:#e5e0d5;
+  --gold:#d8aa5c;--muted:#6d7773;--shadow:0 18px 55px rgba(24,50,46,.12);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{margin:0;min-height:100vh;background:
+radial-gradient(circle at 10% 0%,rgba(216,170,92,.18),transparent 28rem),
+radial-gradient(circle at 100% 10%,rgba(36,94,86,.12),transparent 30rem),var(--cream)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1180px;margin:auto;padding:22px 18px 90px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#173f3a,#245e56);color:white;border-radius:30px;padding:28px;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-80px;top:-120px;background:rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,#f0c77e,#c68c37);display:grid;place-items:center;color:#173f3a;font-weight:900;font-size:21px;box-shadow:inset 0 1px rgba(255,255,255,.55)}
+h1{margin:18px 0 8px;font-size:clamp(28px,5vw,48px);line-height:1.02;letter-spacing:-.04em}
+.hero p{margin:0;color:rgba(255,255,255,.78);max-width:720px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);padding:14px;border-radius:16px;backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:23px}.stat span{font-size:12px;color:rgba(255,255,255,.7)}
+.toolbar{position:sticky;top:0;z-index:20;padding:16px 0 10px;background:linear-gradient(var(--cream) 70%,transparent)}
+.searchbox{display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--line);border-radius:18px;padding:5px 8px 5px 16px;box-shadow:0 10px 30px rgba(23,63,58,.08)}
+.searchbox input{flex:1;border:0;outline:0;background:transparent;padding:12px 0;font-size:16px;min-width:0;color:var(--ink)}
+.clear{border:0;background:#eff3f1;color:var(--ink);width:38px;height:38px;border-radius:12px;font-size:18px}
+.filters{display:flex;gap:8px;overflow:auto;padding:10px 2px 2px;scrollbar-width:none}
+.chip{white-space:nowrap;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:9px 13px;border-radius:999px}
+.chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.secondary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+select{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:11px;color:var(--ink)}
+.meta{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px}
+.card{border:1px solid var(--line);background:rgba(255,253,250,.92);border-radius:var(--radius);padding:17px;box-shadow:0 7px 24px rgba(28,55,51,.06);transition:.18s transform,.18s box-shadow;text-align:left;width:100%;color:inherit}
+.card:hover{transform:translateY(-2px);box-shadow:0 14px 35px rgba(28,55,51,.11)}
+.cardtop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.badge{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
+.badge.oliver{background:#e8f3ef;color:#176153}.badge.bernardo{background:#fff0d5;color:#8b5b16}
+.card h3{font-size:16px;line-height:1.25;margin:12px 0 10px}
+.inst{font-weight:850;font-size:20px;letter-spacing:-.02em}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:9px;color:var(--muted);font-size:12px}
+.details b{display:block;color:var(--ink);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.note{margin-top:12px;background:#fff7e8;border-left:3px solid var(--gold);padding:9px 10px;border-radius:9px;font-size:12px;line-height:1.35}
+.empty{grid-column:1/-1;text-align:center;padding:50px 20px;background:var(--paper);border:1px dashed #cfc8ba;border-radius:22px;color:var(--muted)}
+dialog{border:0;padding:0;border-radius:26px;width:min(760px,calc(100% - 24px));max-height:88vh;box-shadow:0 30px 100px rgba(0,0,0,.32);background:var(--paper)}
+dialog::backdrop{background:rgba(6,26,23,.62);backdrop-filter:blur(5px)}
+.modalhead{position:sticky;top:0;background:linear-gradient(135deg,var(--ink),var(--ink2));color:white;padding:21px;display:flex;justify-content:space-between;gap:20px;z-index:2}
+.modalhead h2{margin:5px 0 0;font-size:21px}.modalhead small{opacity:.72}
+.close{border:0;background:rgba(255,255,255,.14);color:white;width:40px;height:40px;border-radius:13px;font-size:19px}
+.modalbody{padding:19px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:auto}
+.field{border:1px solid var(--line);border-radius:14px;padding:12px;min-height:67px;background:#fff}
+.field.wide{grid-column:1/-1}.field label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}.field div{overflow-wrap:anywhere}
+.footerhint{text-align:center;color:var(--muted);font-size:12px;margin-top:22px}
+@media(max-width:620px){.shell{padding:12px 10px 70px}.hero{border-radius:23px;padding:22px 18px}.stats{grid-template-columns:repeat(3,1fr)}.stat{padding:11px 9px}.stat b{font-size:19px}.secondary{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.modalbody{grid-template-columns:1fr}.field.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<main class="shell">
+<section class="hero">
+  <div class="brand"><div class="logo">IB</div><div><b>Instalaciones</b><div style="opacity:.68;font-size:12px">Consulta rápida 2026</div></div></div>
+  <h1>Encuentra una instalación en segundos.</h1>
+  <p>Busca por cliente, instalación, pedido, máquina, taller o cualquier palabra de la ficha.</p>
+  <div class="stats">
+    <div class="stat"><b id="totalStat">0</b><span>Total</span></div>
+    <div class="stat"><b id="oliverStat">0</b><span>Oliver</span></div>
+    <div class="stat"><b id="bernardoStat">0</b><span>Bernardo</span></div>
+  </div>
+</section>
+
+<section class="toolbar">
+  <div class="searchbox">
+    <span aria-hidden="true">⌕</span>
+    <input id="q" type="search" placeholder="Cliente, nº instalación, pedido, máquina…" autocomplete="off">
+    <button class="clear" id="clear" aria-label="Limpiar">×</button>
+  </div>
+  <div class="filters">
+    <button class="chip active" data-owner="TODOS">Todos</button>
+    <button class="chip" data-owner="OLIVER">Oliver</button>
+    <button class="chip" data-owner="BERNARDO">Bernardo</button>
+    <button class="chip" data-special="comments">Con comentarios</button>
+    <button class="chip" data-special="pending">Sin montaje</button>
+  </div>
+  <div class="secondary">
+    <select id="taller"><option value="">Todos los talleres</option></select>
+    <select id="machine"><option value="">Todos los tipos de máquina</option></select>
+  </div>
+</section>
+
+<div class="meta"><span id="resultCount"></span><span id="activeFilter"></span></div>
+<section class="grid" id="grid"></section>
+<p class="footerhint">Datos incluidos desde EstadoPedidosAct2026.xlsx · Solo Oliver y Bernardo</p>
+</main>
+
+<dialog id="modal">
+  <div class="modalhead"><div><small id="modalSub"></small><h2 id="modalTitle"></h2></div><button class="close" onclick="modal.close()">×</button></div>
+  <div class="modalbody" id="modalBody"></div>
+</dialog>
+
+<script src="data.js"></script>
+<script>
+const data = window.INSTALLATIONS_DATA || [];
+const state={owner:"TODOS",special:"",q:"",taller:"",machine:""};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const norm=s=>(s??"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const esc=s=>(s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+const val=(r,k)=>r[k]??"";
+function hasComments(r){return ["COMENTARIOS (RETRASO MEDIDAS RESPECTO PAGO)","DIVERGENCIAS","Remakes","Remakes 2"].some(k=>norm(val(r,k)));}
+function isPending(r){const m=norm(val(r,"Fecha montaje"));return !m || m==="cancelado";}
+function searchable(r){return norm(Object.entries(r).filter(([k])=>!k.startsWith("_")).map(([,v])=>v).join(" | "))}
+function fillSelect(id,key){const sel=$(id);[...new Set(data.map(r=>String(val(r,key))).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true})).forEach(v=>sel.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`))}
+fillSelect("#taller","TALLER");fillSelect("#machine","Tipo de Máq.");
+function updateStats(){
+ $("#totalStat").textContent=data.length;
+ $("#oliverStat").textContent=data.filter(r=>norm(val(r,"COMERCIAL"))==="oliver").length;
+ $("#bernardoStat").textContent=data.filter(r=>norm(val(r,"COMERCIAL"))==="bernardo").length;
+}
+function matches(r){
+ if(state.owner!=="TODOS" && norm(val(r,"COMERCIAL"))!==norm(state.owner)) return false;
+ if(state.special==="comments"&&!hasComments(r))return false;
+ if(state.special==="pending"&&!isPending(r))return false;
+ if(state.taller&&String(val(r,"TALLER"))!==state.taller)return false;
+ if(state.machine&&String(val(r,"Tipo de Máq."))!==state.machine)return false;
+ const terms=norm(state.q).split(" ").filter(Boolean);
+ const hay=searchable(r);
+ return terms.every(t=>hay.includes(t));
+}
+function card(r){
+ const owner=norm(val(r,"COMERCIAL"));
+ const comment=val(r,"COMENTARIOS (RETRASO MEDIDAS RESPECTO PAGO)")||val(r,"DIVERGENCIAS")||val(r,"Remakes")||"";
+ return `<button class="card" data-id="${esc(r._id)}">
+   <div class="cardtop"><div><div class="inst">#${esc(val(r,"NºInst."))}</div><small style="color:var(--muted)">Instalación</small></div><span class="badge ${owner}">${esc(val(r,"COMERCIAL"))}</span></div>
+   <h3>${esc(val(r,"Cliente")||"Sin cliente")}</h3>
+   <div class="details">
+     <span>Pedido<b>${esc(val(r,"Número de pedido")||"—")}</b></span>
+     <span>Máquina<b>${esc(val(r,"Nº de Máq.")||"—")}</b></span>
+     <span>Tipo<b>${esc(val(r,"Tipo de Máq.")||"—")}</b></span>
+     <span>Montaje<b>${esc(val(r,"Fecha montaje")||"Pendiente")}</b></span>
+     <span>Taller<b>${esc(val(r,"TALLER")||"—")}</b></span>
+     <span>MTTO<b>${esc(val(r,"MTTO")||"—")}</b></span>
+   </div>
+   ${comment?`<div class="note">${esc(comment)}</div>`:""}
+ </button>`;
+}
+function render(){
+ const list=data.filter(matches);
+ $("#resultCount").textContent=`${list.length} resultado${list.length===1?"":"s"}`;
+ $("#activeFilter").textContent=state.q?`Buscando: “${state.q}”`:"";
+ $("#grid").innerHTML=list.length?list.map(card).join(""):`<div class="empty"><div style="font-size:35px">⌕</div><h3>No aparece ninguna instalación</h3><p>Prueba con menos palabras o limpia algún filtro.</p></div>`;
+ $$(".card").forEach(el=>el.onclick=()=>openRecord(data.find(r=>String(r._id)===el.dataset.id)));
+}
+const labels={
+ "Campo 1":"Orden","Fecha Pedido":"Fecha de pedido","NºInst.":"Nº de instalación","Cliente":"Cliente","COMERCIAL":"Comercial","MTTO":"Mantenimiento",
+ "Tipo de Máq.":"Tipo de máquina","Número de pedido":"Número de pedido","Nº de Máq.":"Número de máquina",
+ "Fecha de pedido a fabrica":"Pedido a fábrica","Fecha aprobación Pedido":"Aprobación del pedido","Fecha salida fábrica":"Salida de fábrica",
+ "Fecha Previsión llegada de fábrica":"Previsión llegada","Fecha envio instalador":"Envío al instalador","TALLER":"Taller","Fecha montaje":"Fecha de montaje",
+ "RECEPCIÓN DE PLANOS":"Recepción de planos","COMENTARIOS (RETRASO MEDIDAS RESPECTO PAGO)":"Comentarios","DIVERGENCIAS":"Divergencias",
+ "Fecha 1":"Fecha 1","Fecha 2":"Fecha 2","Remakes":"Remakes","Remakes 2":"Remakes 2"
+};
+function openRecord(r){
+ $("#modalSub").textContent=`Instalación #${val(r,"NºInst.")} · ${val(r,"COMERCIAL")}`;
+ $("#modalTitle").textContent=val(r,"Cliente")||"Ficha de instalación";
+ const fields=Object.entries(r).filter(([k,v])=>!k.startsWith("_")&&v!==null&&v!=="");
+ $("#modalBody").innerHTML=fields.map(([k,v])=>{
+   const wide=["Cliente","COMENTARIOS (RETRASO MEDIDAS RESPECTO PAGO)","DIVERGENCIAS","Remakes","Remakes 2"].includes(k);
+   return `<div class="field ${wide?"wide":""}"><label>${esc(labels[k]||k)}</label><div>${esc(v)}</div></div>`
+ }).join("");
+ modal.showModal();
+}
+$("#q").addEventListener("input",e=>{state.q=e.target.value;render()});
+$("#clear").onclick=()=>{$("#q").value="";state.q="";render();$("#q").focus()};
+$$("[data-owner]").forEach(b=>b.onclick=()=>{
+ state.owner=b.dataset.owner;state.special="";
+ $$(".chip").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()
+});
+$$("[data-special]").forEach(b=>b.onclick=()=>{
+ state.special=state.special===b.dataset.special?"":b.dataset.special;
+ $$("[data-special]").forEach(x=>x.classList.toggle("active",x.dataset.special===state.special));
+ if(state.special)$$("[data-owner]").forEach(x=>x.classList.remove("active"));
+ else $$(`[data-owner="${state.owner}"]`).forEach(x=>x.classList.add("active"));
+ render()
+});
+$("#taller").onchange=e=>{state.taller=e.target.value;render()};
+$("#machine").onchange=e=>{state.machine=e.target.value;render()};
+modal.addEventListener("click",e=>{if(e.target===modal)modal.close()});
+updateStats();render();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>

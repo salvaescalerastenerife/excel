@@ -1,0 +1,12 @@
+APP DE INSTALACIONES — OLIVER Y BERNARDO
+
+USO RÁPIDO EN ORDENADOR
+1. Descomprime el ZIP.
+2. Abre index.html con Chrome, Edge, Safari o Firefox.
+
+PUBLICAR COMO APP EN IPHONE
+1. Sube todos los archivos de la carpeta a GitHub Pages, Netlify o cualquier alojamiento web.
+2. Abre la dirección en Safari.
+3. Pulsa Compartir > Añadir a pantalla de inicio.
+
+La búsqueda funciona por cualquier dato de la ficha. Los datos están incrustados en data.js.
