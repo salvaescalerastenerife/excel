@@ -26,3 +26,7 @@ INSTALAR EN IPHONE
 CORRECCIÓN V3
 - Los números de instalación ya no se interpretan como fechas.
 - Solo las columnas de fecha se convierten desde el formato interno de Excel.
+
+ICONO V4
+- Incluido icono de Canarias Accesible + Excel + salvaescaleras.
+- Añadidos tamaños para iPhone y Android.
