@@ -1,4 +1,4 @@
-APP DE INSTALACIONES — OLIVER Y BERNARDO · VERSIÓN 2
+APP DE INSTALACIONES — OLIVER Y BERNARDO · VERSIÓN 3
 
 ACTUALIZAR LOS DATOS
 1. Abre la app.
@@ -22,3 +22,7 @@ INSTALAR EN IPHONE
 1. Publica todos los archivos en GitHub Pages o similar.
 2. Abre la dirección en Safari.
 3. Pulsa Compartir > Añadir a pantalla de inicio.
+
+CORRECCIÓN V3
+- Los números de instalación ya no se interpretan como fechas.
+- Solo las columnas de fecha se convierten desde el formato interno de Excel.
